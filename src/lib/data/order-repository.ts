@@ -17,12 +17,24 @@ export class MockOrderRepository implements IOrderRepository {
     let total = 0;
 
     for (const itemDto of dto.items) {
+      if (itemDto.quantity <= 0) {
+        throw new Error('كمية المنتج يجب أن تكون أكبر من صفر');
+      }
+
       const product = products.find((p) => p.id === itemDto.productId);
       if (!product) {
         throw new Error(`المنتج بـ ID ${itemDto.productId} غير موجود`);
       }
+
+      // Synchronous Atomic Stock Check and Decrement
       if (!product.isAvailable || product.stock < itemDto.quantity) {
-        throw new Error(`المنتج ${product.name} غير متوفر بالكمية المطلوبة`);
+        throw new Error(`المنتج ${product.name} لم تعد الكمية المطلوبة متوفرة بالمخزون بسبب طلب آخر متزامن`);
+      }
+
+      // Deduct stock atomically
+      product.stock -= itemDto.quantity;
+      if (product.stock <= 0) {
+        product.isAvailable = false;
       }
 
       const subtotal = product.price * itemDto.quantity;

@@ -9,11 +9,11 @@ export interface D1DatabaseBinding {
     bind(...values: unknown[]): {
       first<T = unknown>(colName?: string): Promise<T | null>;
       all<T = unknown>(): Promise<{ results: T[] }>;
-      run(): Promise<{ success: boolean; meta: Record<string, unknown> }>;
+      run(): Promise<{ success: boolean; meta: { changes: number; [key: string]: unknown } }>;
     };
     all<T = unknown>(): Promise<{ results: T[] }>;
     first<T = unknown>(colName?: string): Promise<T | null>;
-    run(): Promise<{ success: boolean; meta: Record<string, unknown> }>;
+    run(): Promise<{ success: boolean; meta: { changes: number; [key: string]: unknown } }>;
   };
   batch<T = unknown>(statements: unknown[]): Promise<T[]>;
 }
@@ -208,16 +208,17 @@ export class D1OrderRepository implements IOrderRepository {
   async createOrder(dto: CreateOrderDTO): Promise<Order> {
     if (!this.db) return this.getFallback().createOrder(dto);
 
-    // 1. Fetch real products from D1 to avoid trusting client prices
     const productRepo = new D1ProductRepository(this.db);
     const orderItemsList = [];
     let calculatedTotal = 0;
+    const now = new Date().toISOString();
 
     for (const itemDto of dto.items) {
       if (itemDto.quantity <= 0) {
         throw new Error('كمية المنتج يجب أن تكون أكبر من صفر');
       }
 
+      // 1. Fetch real product from D1 to get authentic unit price and name
       const product = await productRepo.getProductById(itemDto.productId);
       if (!product) {
         throw new Error(`المنتج بـ ID ${itemDto.productId} غير موجود`);
@@ -227,8 +228,24 @@ export class D1OrderRepository implements IOrderRepository {
         throw new Error(`المنتج ${product.name} غير متوفر حالياً`);
       }
 
-      if (product.stock < itemDto.quantity) {
-        throw new Error(`الكمية المطلوبة من ${product.name} غير متوفرة بالمخزون (المتبقي: ${product.stock})`);
+      // 2. Perform Conditional Atomic Update to prevent race condition overbooking
+      // UPDATE products SET stock = stock - quantity WHERE id = id AND stock >= quantity AND is_available = 1
+      const updateResult = await this.db
+        .prepare(
+          'UPDATE products SET stock = stock - ?, is_available = CASE WHEN stock - ? <= 0 THEN 0 ELSE 1 END, updated_at = ? WHERE id = ? AND stock >= ? AND is_available = 1'
+        )
+        .bind(
+          itemDto.quantity,
+          itemDto.quantity,
+          now,
+          itemDto.productId,
+          itemDto.quantity
+        )
+        .run();
+
+      // Check if the conditional atomic update affected any row
+      if (!updateResult.success || !updateResult.meta || updateResult.meta.changes === 0) {
+        throw new Error(`المنتج ${product.name} لم تعد الكمية المطلوبة متوفرة بالمخزون بسبب طلب آخر متزامن`);
       }
 
       const subtotal = product.price * itemDto.quantity;
@@ -242,19 +259,11 @@ export class D1OrderRepository implements IOrderRepository {
         subtotal,
         unit: product.unit,
       });
-
-      // Atomically decrement stock in D1
-      const newStock = product.stock - itemDto.quantity;
-      await productRepo.updateProduct(product.id, {
-        stock: newStock,
-        isAvailable: newStock > 0,
-      });
     }
 
-    const now = new Date().toISOString();
     const orderId = `ORD-${Date.now().toString().slice(-6)}`;
 
-    // 2. Insert Order into D1
+    // 3. Insert Order into D1
     await this.db
       .prepare(
         'INSERT INTO orders (id, customer_name, phone, governorate, area, address, landmark, notes, total, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
@@ -275,7 +284,7 @@ export class D1OrderRepository implements IOrderRepository {
       )
       .run();
 
-    // 3. Insert Order Items into D1
+    // 4. Insert Order Items into D1
     for (const item of orderItemsList) {
       await this.db
         .prepare(
