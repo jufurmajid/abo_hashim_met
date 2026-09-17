@@ -49,7 +49,7 @@
 يتم اختيار المزود عبر المتغير البيئي `STORAGE_PROVIDER`:
 
 1. **`mock`:** يسترجع الروابط التجريبية.
-2. **`r2`:** يستخدم Cloudflare R2 Bucket.
+2. **`r2` (Cloudflare R2):** يتصل بخدمة `R2StorageService` مع التحقق من الصيغ (JPG, PNG, WebP) والحد الأقصى 5MB وإنشاء مفاتيح UUID آمنة.
 3. **`s3`:** يستخدم Amazon S3 أو DigitalOcean Spaces أو Supabase Storage.
 
 ---
@@ -76,8 +76,7 @@ STORAGE_PROVIDER=mock
 # Cloudflare Configuration
 DB_BINDING=DB
 R2_BUCKET_NAME=abo-hashim-media
-R2_ACCESS_KEY_ID=your_access_key
-R2_SECRET_ACCESS_KEY=your_secret_key
+R2_PUBLIC_DOMAIN=https://media.abohashim.com
 
 # PostgreSQL / Supabase Configuration
 DATABASE_URL=postgresql://user:password@localhost:5432/abohashim_db
@@ -88,6 +87,22 @@ TELEGRAM_ADMIN_CHAT_ID=your_chat_id
 TELEGRAM_ORDERS_BOT_TOKEN=your_token
 TELEGRAM_ORDERS_CHAT_ID=your_chat_id
 ```
+
+---
+
+## ☁️ إعداد Cloudflare D1 و Cloudflare R2 (يدوياً)
+
+1. **إنشاء Cloudflare D1 Database:**
+   ```bash
+   npx wrangler d1 create abo_hashim_db
+   npx wrangler d1 execute DB --file=./migrations/0001_initial_schema.sql
+   npx wrangler d1 execute DB --file=./migrations/0002_seed_products.sql
+   ```
+
+2. **إنشاء Cloudflare R2 Bucket:**
+   ```bash
+   npx wrangler r2 bucket create abo-hashim-media
+   ```
 
 ---
 
@@ -102,42 +117,14 @@ node scripts/export-data.mjs
 - `backups/backup.json`: صيغة JSON قياسية للمنتجات والطلبات.
 - `backups/backup.sql`: صيغة استعلامات SQL قياسية (`INSERT INTO products ...`).
 
-### 2. استيراد البيانات (Import)
-- **إلى PostgreSQL / Supabase:** قم بتشغيل ملف `backups/backup.sql` مباشرة في SQL Editor الخاص بقاعدة البيانات.
-- **إلى Cloudflare D1:**
-  ```bash
-  npx wrangler d1 execute DB --file=./backups/backup.sql
-  ```
-
 ---
 
 ## 🔄 دلائل نقل الاستضافة والتطبيقات (Migration Guides)
 
-### 1. Migration إلى PostgreSQL
-1. قم بإنشاء قاعدة البيانات وجدول المنتجات والطلبات باستخدام الاستعلامات القياسية المعرفة في `backups/backup.sql`.
-2. حدّث المتغيرات البيئية في الاستضافة:
-   ```env
-   DB_PROVIDER=postgres
-   DATABASE_URL=postgresql://username:password@hostname:5432/abohashim_db
-   ```
-
-### 2. Migration إلى Supabase
-1. افتح مشروعك في Supabase وقم بتشغيل `backups/backup.sql` في الـ SQL Editor.
-2. احصل على Connection String وضعه في `.env.local`:
-   ```env
-   DB_PROVIDER=supabase
-   DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[REF].supabase.co:5432/postgres
-   ```
-
-### 3. Migration إلى Vercel
-1. اربط المستودع بـ Vercel.
-2. اضف المتغيرات البيئية بنفس الأسماء المحددة في `.env.example`.
-3. اضغط Deploy!
-
-### 4. Migration من Cloudflare R2 إلى AWS S3
-1. ارفع صور المجلد إلى S3 Bucket.
-2. غيّر المتغير البيئي إلى:
+### 1. Migration من Cloudflare R2 إلى AWS S3 أو Supabase Storage
+1. قم برفع كافة ملفات صور المنتجات من R2 إلى AWS S3 Bucket أو Supabase Storage.
+2. غيّر المتغير البيئي في الاستضافة إلى:
    ```env
    STORAGE_PROVIDER=s3
    ```
-3. ستقوم طبقة Adapters بتوجيه رفع وتحميل الصور إلى S3 تلقائياً دون التعديل على واجهة المنتجات.
+3. ستتولى طبقة Adapters توجيه العمليات إلى S3 تلقائياً دون تعديل أي مكون واجهة.

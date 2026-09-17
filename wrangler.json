@@ -12,5 +12,11 @@
       "database_name": "abo_hashim_db",
       "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "abo-hashim-media"
+    }
   ]
 }

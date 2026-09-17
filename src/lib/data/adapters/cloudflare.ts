@@ -2,6 +2,7 @@ import { Product, Order, OrderStatus, CreateOrderDTO, CategoryId } from '@/types
 import { IProductRepository, IOrderRepository, IStorageService } from '../interfaces';
 import { productRepository } from '../product-repository';
 import { orderRepository } from '../order-repository';
+import crypto from 'crypto';
 
 // Interface for Cloudflare D1 Database binding
 export interface D1DatabaseBinding {
@@ -16,6 +17,20 @@ export interface D1DatabaseBinding {
     run(): Promise<{ success: boolean; meta: { changes: number; [key: string]: unknown } }>;
   };
   batch<T = unknown>(statements: unknown[]): Promise<T[]>;
+}
+
+// Interface for Cloudflare R2 Bucket binding
+export interface R2BucketBinding {
+  put(
+    key: string,
+    value: ArrayBuffer | ArrayBufferView | string | Blob,
+    options?: { httpMetadata?: { contentType?: string } }
+  ): Promise<unknown>;
+  get(key: string): Promise<{
+    body: ReadableStream;
+    httpMetadata?: { contentType?: string };
+  } | null>;
+  delete(key: string): Promise<void>;
 }
 
 interface D1ProductRow {
@@ -229,7 +244,6 @@ export class D1OrderRepository implements IOrderRepository {
       }
 
       // 2. Perform Conditional Atomic Update to prevent race condition overbooking
-      // UPDATE products SET stock = stock - quantity WHERE id = id AND stock >= quantity AND is_available = 1
       const updateResult = await this.db
         .prepare(
           'UPDATE products SET stock = stock - ?, is_available = CASE WHEN stock - ? <= 0 THEN 0 ELSE 1 END, updated_at = ? WHERE id = ? AND stock >= ? AND is_available = 1'
@@ -243,7 +257,6 @@ export class D1OrderRepository implements IOrderRepository {
         )
         .run();
 
-      // Check if the conditional atomic update affected any row
       if (!updateResult.success || !updateResult.meta || updateResult.meta.changes === 0) {
         throw new Error(`المنتج ${product.name} لم تعد الكمية المطلوبة متوفرة بالمخزون بسبب طلب آخر متزامن`);
       }
@@ -382,14 +395,120 @@ export class D1OrderRepository implements IOrderRepository {
   }
 }
 
+export const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB Limit
+
+export interface FilePayload {
+  buffer: Buffer;
+  mimeType: string;
+  size: number;
+  originalName: string;
+}
+
 export class R2StorageService implements IStorageService {
-  async uploadImage(file: File | Buffer, filename: string): Promise<string> {
-    console.log(`[Cloudflare R2 Adapter] Uploading ${filename}`);
-    return `https://r2-bucket.placeholder.com/products/${filename}`;
+  private bucket: R2BucketBinding | null;
+  private publicDomain: string;
+
+  constructor(bucket?: R2BucketBinding, publicDomain?: string) {
+    this.bucket = bucket || null;
+    this.publicDomain = publicDomain || process.env.R2_PUBLIC_DOMAIN || 'https://media.abohashim.com';
+  }
+
+  private validateFile(file: File | Buffer | FilePayload) {
+    let size = 0;
+    let type = '';
+
+    if ('type' in file && typeof file.type === 'string') {
+      type = file.type;
+      size = file.size;
+    } else if ('mimeType' in file && typeof file.mimeType === 'string') {
+      type = file.mimeType;
+      size = file.size;
+    } else if (Buffer.isBuffer(file)) {
+      size = file.length;
+      type = 'image/jpeg'; // Default fallback if plain buffer
+    }
+
+    if (type && !ALLOWED_MIME_TYPES.includes(type.toLowerCase())) {
+      throw new Error(`نوع الملف غير مسموح (${type}). الأنواع المسموحة فقط: JPG, PNG, WebP`);
+    }
+
+    if (size > MAX_FILE_SIZE_BYTES) {
+      throw new Error(`حجم الملف كبير جداً (${(size / (1024 * 1024)).toFixed(2)} MB). الحد الأقصى المسموح به هو 5 ميغابايت.`);
+    }
+  }
+
+  private generateSafeFilename(originalFilename: string): string {
+    const extMatch = originalFilename.match(/\.(jpeg|jpg|png|webp)$/i);
+    const ext = extMatch ? extMatch[0].toLowerCase() : '.jpg';
+    const uuid = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+    return `products/prod-img-${uuid}${ext}`;
+  }
+
+  async uploadImage(
+    file: File | Buffer | FilePayload,
+    filename: string
+  ): Promise<string> {
+    this.validateFile(file);
+
+    const safeKey = this.generateSafeFilename(filename);
+
+    if (!this.bucket) {
+      console.log(`[Cloudflare R2 Adapter] Bucket binding not connected, returning mock URL for ${safeKey}`);
+      return `${this.publicDomain}/${safeKey}`;
+    }
+
+    let fileBuffer: ArrayBuffer | string;
+    let contentType = 'image/jpeg';
+
+    if (typeof file === 'object' && 'buffer' in file && Buffer.isBuffer((file as FilePayload).buffer)) {
+      const payload = file as FilePayload;
+      fileBuffer = new Uint8Array(payload.buffer).buffer;
+      contentType = payload.mimeType;
+    } else if (Buffer.isBuffer(file)) {
+      fileBuffer = new Uint8Array(file).buffer;
+    } else if (file instanceof File) {
+      fileBuffer = await file.arrayBuffer();
+      contentType = file.type;
+    } else {
+      fileBuffer = String(file);
+    }
+
+    await this.bucket.put(safeKey, fileBuffer, {
+      httpMetadata: { contentType },
+    });
+
+    return `${this.publicDomain}/${safeKey}`;
   }
 
   async deleteImage(fileUrl: string): Promise<boolean> {
-    console.log(`[Cloudflare R2 Adapter] Deleting image ${fileUrl}`);
-    return true;
+    if (!fileUrl) return false;
+
+    // Extract storage key from public URL
+    const storageKey = fileUrl.replace(`${this.publicDomain}/`, '').replace(/^https?:\/\/[^\/]+\//, '');
+
+    if (!this.bucket) {
+      console.log(`[Cloudflare R2 Adapter] Bucket binding not connected, mock deleting ${storageKey}`);
+      return true;
+    }
+
+    try {
+      await this.bucket.delete(storageKey);
+      return true;
+    } catch (e) {
+      console.error(`[Cloudflare R2 Adapter] Failed to delete image ${storageKey}:`, e);
+      return false;
+    }
+  }
+
+  async replaceImage(
+    oldFileUrl: string,
+    newFile: File | Buffer | FilePayload,
+    newFilename: string
+  ): Promise<string> {
+    if (oldFileUrl) {
+      await this.deleteImage(oldFileUrl);
+    }
+    return this.uploadImage(newFile, newFilename);
   }
 }

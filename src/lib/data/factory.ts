@@ -1,7 +1,7 @@
 import { IProductRepository, IOrderRepository, IStorageService } from './interfaces';
 import { productRepository } from './product-repository';
 import { orderRepository } from './order-repository';
-import { D1ProductRepository, D1OrderRepository, R2StorageService, D1DatabaseBinding } from './adapters/cloudflare';
+import { D1ProductRepository, D1OrderRepository, R2StorageService, D1DatabaseBinding, R2BucketBinding } from './adapters/cloudflare';
 import { MockStorageService } from '../services/storage';
 
 export type DBProvider = 'mock' | 'd1' | 'postgres' | 'supabase';
@@ -37,12 +37,12 @@ export function getOrderRepository(d1Binding?: D1DatabaseBinding): IOrderReposit
   }
 }
 
-export function getStorageService(): IStorageService {
+export function getStorageService(r2Binding?: R2BucketBinding): IStorageService {
   const provider = (process.env.STORAGE_PROVIDER || 'mock').toLowerCase() as StorageProvider;
 
   switch (provider) {
     case 'r2':
-      return new R2StorageService();
+      return new R2StorageService(r2Binding);
     case 's3':
       return new MockStorageService();
     case 'mock':
