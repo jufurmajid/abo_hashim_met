@@ -10,7 +10,7 @@ import { CheckoutModal } from '@/components/CheckoutModal';
 import { Footer } from '@/components/Footer';
 import { CartProvider } from '@/context/CartContext';
 import { CategoryId, Product } from '@/types';
-import { productRepository } from '@/lib/data/product-repository';
+import { getProductRepository } from '@/lib/data/factory';
 
 function StoreApp() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | 'all'>('all');
@@ -22,7 +22,8 @@ function StoreApp() {
 
   useEffect(() => {
     async function loadProducts() {
-      const all = await productRepository.getAllProducts();
+      const activeProductRepo = getProductRepository();
+      const all = await activeProductRepo.getAllProducts();
       setProducts(all);
     }
     loadProducts();

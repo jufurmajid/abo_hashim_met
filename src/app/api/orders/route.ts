@@ -1,4 +1,4 @@
-import { orderRepository } from '@/lib/data/order-repository'
+import { getOrderRepository } from '@/lib/data/factory'
 import { validateCustomerDetails } from '@/lib/validation'
 
 export async function POST(request: Request) {
@@ -21,8 +21,9 @@ export async function POST(request: Request) {
       )
     }
 
-    // Save order via OrderRepository (recalculates totals safely server-side)
-    const order = await orderRepository.createOrder({
+    // Save order via Factory OrderRepository (recalculates totals safely server-side)
+    const activeOrderRepo = getOrderRepository()
+    const order = await activeOrderRepo.createOrder({
       customer,
       items,
     })
