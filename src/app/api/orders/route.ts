@@ -1,5 +1,6 @@
 import { getOrderRepository } from '@/lib/data/factory'
 import { validateCustomerDetails } from '@/lib/validation'
+import { telegramOrderService } from '@/lib/services/telegram-order'
 
 export async function POST(request: Request) {
   try {
@@ -21,12 +22,19 @@ export async function POST(request: Request) {
       )
     }
 
-    // Save order via Factory OrderRepository (recalculates totals safely server-side)
+    // Save order via Factory OrderRepository (recalculates totals safely server-side and checks stock)
     const activeOrderRepo = getOrderRepository()
     const order = await activeOrderRepo.createOrder({
       customer,
       items,
     })
+
+    // Send Telegram Order Notification (non-blocking try-catch)
+    try {
+      await telegramOrderService.sendNewOrderNotification(order)
+    } catch (telegramErr) {
+      console.error('[API Orders] Failed to send Telegram notification:', telegramErr)
+    }
 
     return Response.json({ success: true, order }, { status: 201 })
   } catch (error: unknown) {
