@@ -6,6 +6,10 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "vars": {
+    "DB_PROVIDER": "d1",
+    "STORAGE_PROVIDER": "r2"
+  },
   "d1_databases": [
     {
       "binding": "DB",
