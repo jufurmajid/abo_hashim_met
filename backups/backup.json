@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-17T10:32:35.201Z",
+  "exportedAt": "2026-09-17T11:00:00.160Z",
   "products": [
     {
       "id": "prod-1",
@@ -12,8 +12,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=800&auto=format&fit=crop",
       "stock": 25,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.156Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-2",
@@ -25,8 +25,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?q=80&w=800&auto=format&fit=crop",
       "stock": 30,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-3",
@@ -38,8 +38,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1587593810167-a84920ea0781?q=80&w=800&auto=format&fit=crop",
       "stock": 50,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-4",
@@ -51,8 +51,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=800&auto=format&fit=crop",
       "stock": 40,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-5",
@@ -64,8 +64,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=800&auto=format&fit=crop",
       "stock": 35,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-6",
@@ -77,8 +77,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1528751014936-863e6e7a319c?q=80&w=800&auto=format&fit=crop",
       "stock": 15,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-7",
@@ -90,8 +90,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1452195100486-9cc805987862?q=80&w=800&auto=format&fit=crop",
       "stock": 20,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-8",
@@ -103,8 +103,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1559561853-08451507cbe7?q=80&w=800&auto=format&fit=crop",
       "stock": 18,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-9",
@@ -116,8 +116,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?q=80&w=800&auto=format&fit=crop",
       "stock": 12,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     },
     {
       "id": "prod-10",
@@ -129,8 +129,8 @@
       "imageUrl": "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?q=80&w=800&auto=format&fit=crop",
       "stock": 22,
       "isAvailable": true,
-      "createdAt": "2026-09-17T10:32:35.201Z",
-      "updatedAt": "2026-09-17T10:32:35.201Z"
+      "createdAt": "2026-09-17T11:00:00.160Z",
+      "updatedAt": "2026-09-17T11:00:00.160Z"
     }
   ],
   "orders": []
