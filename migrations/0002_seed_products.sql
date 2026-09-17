@@ -1,0 +1,21 @@
+-- Cloudflare D1 Migration: 0002_seed_products.sql
+
+-- Insert default categories
+INSERT OR IGNORE INTO categories (id, name, slug, description) VALUES
+('meats', 'اللحوم', 'meats', 'لحوم بلدية طازجة عالية الجودة'),
+('dairy', 'الألبان', 'dairy', 'ألبان طازجة وقشطة بلدية'),
+('cheese', 'الأجبان', 'cheese', 'أجبان متنوعة ولذيذة'),
+('other', 'أخرى', 'other', 'منتجات غذائية مكملة ومختارة');
+
+-- Insert sample products
+INSERT OR REPLACE INTO products (id, name, description, price, unit, category, image_url, stock, is_available, created_at, updated_at) VALUES
+('prod-1', 'لحم غنم طازج (عراقي)', 'لحم خروف بلدي طازج مقطع حسب الطلب، خالي من الدهون الزائدة.', 18000, 'كغم', 'meats', 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=800&auto=format&fit=crop', 25, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-2', 'لحم عجل بلدي', 'لحم عجل طري ممتاز مناسب للطبخ والكباب والشواء.', 16000, 'كغم', 'meats', 'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?q=80&w=800&auto=format&fit=crop', 30, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-3', 'دجاج طازج مذبوح', 'دجاج بلدي طازج نظيف ومجهز يومياً بصحة جيدة.', 4500, 'دجاجة (1.2 كغم)', 'meats', 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?q=80&w=800&auto=format&fit=crop', 50, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-4', 'حليب أبقار طبيعي طازج', 'حليب طبيعي 100% غير مبستر بدون أي ألوان أو مواد حافظة.', 2000, 'لتر', 'dairy', 'https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=800&auto=format&fit=crop', 40, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-5', 'لبن خاثر بلدي', 'لبن خاثر طبيعي طازج ذو طعم غني وقوام ممتازة.', 2500, 'علبة (1.5 كغم)', 'dairy', 'https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=800&auto=format&fit=crop', 35, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-6', 'قشطة عربية عرب', 'قشطة بلية طازجة مصنوعة يومياً بحرفية عالية.', 6000, 'كغم', 'dairy', 'https://images.unsplash.com/photo-1528751014936-863e6e7a319c?q=80&w=800&auto=format&fit=crop', 15, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-7', 'جبن عرب بلدي ممتاز', 'جبن أبيض طبيعي مصنوع من حليب الأبقار والأغنام الطازج.', 8000, 'كغم', 'cheese', 'https://images.unsplash.com/photo-1452195100486-9cc805987862?q=80&w=800&auto=format&fit=crop', 20, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-8', 'جبنة حلوم طازجة', 'جبنة حلوم قابلة للشواء والقلي بطعم ونكهة مميزة.', 9000, 'كغم', 'cheese', 'https://images.unsplash.com/photo-1559561853-08451507cbe7?q=80&w=800&auto=format&fit=crop', 18, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-9', 'سمن بلدي خالص', 'سمن طبيعي فاخر 100% بنكهة أصلية ورائحة ممتازة.', 15000, 'علبة (1 كغم)', 'other', 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?q=80&w=800&auto=format&fit=crop', 12, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('prod-10', 'زبدة بلدية طازجة', 'زبدة مصنوعة من حليب طبيعي خالٍ من الإضافات الاصطناعية.', 7500, '500 غم', 'dairy', 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?q=80&w=800&auto=format&fit=crop', 22, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
