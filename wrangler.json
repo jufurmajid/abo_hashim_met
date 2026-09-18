@@ -8,19 +8,13 @@
   ],
   "vars": {
     "DB_PROVIDER": "d1",
-    "STORAGE_PROVIDER": "r2"
+    "STORAGE_PROVIDER": "local"
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "abo_hashim_db",
       "database_id": "2ad9afc1-72a6-4581-9356-2e0c0dcc37e5"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "R2_BUCKET",
-      "bucket_name": "abo-hashim-media"
     }
   ]
 }
