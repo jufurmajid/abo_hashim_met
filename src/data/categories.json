@@ -1,0 +1,26 @@
+[
+  {
+    "id": "meats",
+    "name": "اللحوم",
+    "slug": "meats",
+    "description": "لحوم بلدية طازجة عالية الجودة"
+  },
+  {
+    "id": "dairy",
+    "name": "الألبان",
+    "slug": "dairy",
+    "description": "ألبان طازجة وقشطة بلدية"
+  },
+  {
+    "id": "cheese",
+    "name": "الأجبان",
+    "slug": "cheese",
+    "description": "أجبان متنوعة ولذيذة"
+  },
+  {
+    "id": "other",
+    "name": "أخرى",
+    "slug": "other",
+    "description": "منتجات غذائية مكملة ومختارة"
+  }
+]

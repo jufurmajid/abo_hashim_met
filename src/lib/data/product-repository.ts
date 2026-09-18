@@ -1,5 +1,6 @@
 import { Product, CategoryId } from '@/types';
-import { SAMPLE_PRODUCTS } from './sample-products';
+import initialProductsData from '@/data/products.json';
+import { syncFileToGitHub } from '../github';
 
 export interface IProductRepository {
   getAllProducts(): Promise<Product[]>;
@@ -10,8 +11,24 @@ export interface IProductRepository {
   deleteProduct(id: string): Promise<boolean>;
 }
 
-export class MockProductRepository implements IProductRepository {
-  private products: Product[] = [...SAMPLE_PRODUCTS];
+export class JsonProductRepository implements IProductRepository {
+  private products: Product[];
+
+  constructor() {
+    this.products = (initialProductsData as Product[]) || [];
+  }
+
+  private async persistToGitHub(commitMessage: string): Promise<void> {
+    try {
+      await syncFileToGitHub({
+        filePath: 'src/data/products.json',
+        content: JSON.stringify(this.products, null, 2),
+        commitMessage,
+      });
+    } catch (err) {
+      console.error('[JsonProductRepository] Error pushing updates to GitHub:', err);
+    }
+  }
 
   async getAllProducts(): Promise<Product[]> {
     return [...this.products];
@@ -35,6 +52,7 @@ export class MockProductRepository implements IProductRepository {
       updatedAt: now,
     };
     this.products.push(newProduct);
+    await this.persistToGitHub(`إضافة منتج جديد: ${newProduct.name} (${newProduct.id})`);
     return { ...newProduct };
   }
 
@@ -47,15 +65,21 @@ export class MockProductRepository implements IProductRepository {
       ...updates,
       updatedAt: new Date().toISOString(),
     };
-    return { ...this.products[index] };
+    const updatedProduct = { ...this.products[index] };
+    await this.persistToGitHub(`تحديث بيانات المنتج: ${updatedProduct.name} (${updatedProduct.id})`);
+    return updatedProduct;
   }
 
   async deleteProduct(id: string): Promise<boolean> {
-    const initialLength = this.products.length;
-    this.products = this.products.filter((p) => p.id !== id);
-    return this.products.length < initialLength;
+    const index = this.products.findIndex((p) => p.id === id);
+    if (index === -1) return false;
+
+    const [deleted] = this.products.splice(index, 1);
+    await this.persistToGitHub(`حذف المنتج: ${deleted.name} (${deleted.id})`);
+    return true;
   }
 }
 
-// Singleton instance for in-memory persistence during application runtime
-export const productRepository: IProductRepository = new MockProductRepository();
+// Singleton instance for runtime usage across store requests
+export const productRepository: IProductRepository = new JsonProductRepository();
+export const MockProductRepository = JsonProductRepository;

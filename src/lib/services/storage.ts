@@ -1,20 +1,11 @@
-/**
- * Interface for Storage operations (e.g., Cloudflare R2 bucket image uploads).
- * Will be implemented in Phase 2 using R2 SDK / Workers S3 bindings.
- */
-export interface IStorageService {
-  uploadImage(file: File | Buffer, filename: string): Promise<string>;
-  deleteImage(fileUrl: string): Promise<boolean>;
-}
+import { IStorageService } from '../data/interfaces';
 
 export class MockStorageService implements IStorageService {
-  async uploadImage(file: File | Buffer, filename: string): Promise<string> {
-    console.log(`[Mock Storage Service] Uploading ${filename}`);
-    return `https://r2-bucket.placeholder.com/products/${filename}`;
+  async uploadImage(_file: File | Buffer, filename: string): Promise<string> {
+    return `https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=800&auto=format&fit=crop#${filename}`;
   }
 
-  async deleteImage(fileUrl: string): Promise<boolean> {
-    console.log(`[Mock Storage Service] Deleting image ${fileUrl}`);
+  async deleteImage(_fileUrl: string): Promise<boolean> {
     return true;
   }
 }
