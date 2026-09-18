@@ -7,14 +7,6 @@
     "nodejs_compat"
   ],
   "vars": {
-    "DB_PROVIDER": "d1",
-    "STORAGE_PROVIDER": "local"
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "abo_hashim_db",
-      "database_id": "2ad9afc1-72a6-4581-9356-2e0c0dcc37e5"
-    }
-  ]
+    "DB_PROVIDER": "json"
+  }
 }
