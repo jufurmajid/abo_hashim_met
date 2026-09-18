@@ -27,6 +27,6 @@
     "tailwindcss": "^4",
     "tsx": "^4.19.2",
     "typescript": "^5",
-    "wrangler": "^3.114.17"
+    "wrangler": "^4.135.0"
   }
 }
