@@ -14,12 +14,20 @@ export interface ITelegramAdminService {
 }
 
 export class TelegramAdminService implements ITelegramAdminService {
-  private botToken: string;
-  private defaultChatId: string;
+  private customBotToken?: string;
+  private customDefaultChatId?: string;
 
   constructor(botToken?: string, defaultChatId?: string) {
-    this.botToken = botToken || process.env.TELEGRAM_ADMIN_BOT_TOKEN || 'your_admin_bot_token_here';
-    this.defaultChatId = defaultChatId || process.env.TELEGRAM_ADMIN_CHAT_ID || 'your_admin_chat_id_here';
+    this.customBotToken = botToken;
+    this.customDefaultChatId = defaultChatId;
+  }
+
+  private get botToken(): string {
+    return this.customBotToken || process.env.TELEGRAM_ADMIN_BOT_TOKEN || 'your_admin_bot_token_here';
+  }
+
+  private get defaultChatId(): string {
+    return this.customDefaultChatId || process.env.TELEGRAM_ADMIN_CHAT_ID || 'your_admin_chat_id_here';
   }
 
   async handleAdminCommand(

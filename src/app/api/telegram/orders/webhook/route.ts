@@ -1,6 +1,6 @@
 import { getOrderRepository } from '@/lib/data/factory';
 import { telegramOrderService } from '@/lib/services/telegram-order';
-import { sendTelegramMessage } from '@/lib/services/telegram';
+import { sendTelegramMessage, sanitizeLog } from '@/lib/services/telegram';
 import { OrderStatus } from '@/types';
 
 export async function POST(request: Request) {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     return Response.json({ ok: true });
   } catch (error: unknown) {
-    console.error('[Orders Webhook API] Error:', error);
+    console.error('[Orders Webhook API] Error:', sanitizeLog(error));
     return Response.json({ ok: false, error: 'Internal Webhook Error' }, { status: 500 });
   }
 }

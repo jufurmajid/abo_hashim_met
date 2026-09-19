@@ -1,6 +1,7 @@
 import { getOrderRepository } from '@/lib/data/factory'
 import { validateCustomerDetails } from '@/lib/validation'
 import { telegramOrderService } from '@/lib/services/telegram-order'
+import { sanitizeLog } from '@/lib/services/telegram'
 
 export async function POST(request: Request) {
   try {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     try {
       await telegramOrderService.sendNewOrderNotification(order)
     } catch (telegramErr) {
-      console.error('[API Orders] Failed to send Telegram notification:', telegramErr)
+      console.error('[API Orders] Failed to send Telegram notification:', sanitizeLog(telegramErr))
     }
 
     return Response.json({ success: true, order }, { status: 201 })

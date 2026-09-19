@@ -71,6 +71,28 @@ npm install
 cp .env.example .env.local
 ```
 
+### 🤖 متغيرات إعداد Telegram Bots و GitHub
+
+المتغيرات المطلوب إضافتها في بيئة التشغيل أو Cloudflare Secrets:
+
+- `TELEGRAM_ORDERS_BOT_TOKEN`: توكن بوت إشعارات طلبات الزبائن.
+- `TELEGRAM_ORDERS_CHAT_ID`: معرّف المحادثة/المجموعة المستلمة لإشعارات الطلبات.
+- `TELEGRAM_ADMIN_BOT_TOKEN`: توكن بوت لوحة تحكم وتحديث المنتجات.
+- `TELEGRAM_ADMIN_CHAT_ID`: معرّف حساب الإدارة المصرّح له بإرسال الأوامر.
+- `GITHUB_TOKEN`: توكن الوصول الشخصي لمزامنة التغييرات مع GitHub (اختياري).
+- `GITHUB_OWNER`: اسم مستخدم أو منظمة GitHub.
+- `GITHUB_REPO`: اسم المستودع (افتراضي: `abo-hashim-met`).
+- `GITHUB_BRANCH`: الفرع المستهدف للمزامنة (افتراضي: `main`).
+
+إضافة الأسرار إلى Cloudflare Workers:
+```bash
+npx wrangler secret put TELEGRAM_ORDERS_BOT_TOKEN
+npx wrangler secret put TELEGRAM_ORDERS_CHAT_ID
+npx wrangler secret put TELEGRAM_ADMIN_BOT_TOKEN
+npx wrangler secret put TELEGRAM_ADMIN_CHAT_ID
+npx wrangler secret put GITHUB_TOKEN
+```
+
 ### 3. تشغيل خادم التطوير
 ```bash
 npm run dev

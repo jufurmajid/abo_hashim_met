@@ -21,6 +21,35 @@ export interface TelegramEditMessageOptions {
 }
 
 /**
+ * Sanitizes text or error objects to ensure bot tokens and sensitive credentials
+ * are never printed in console logs, error messages, or build logs.
+ */
+export function sanitizeLog(input: unknown, tokenToMask?: string): string {
+  let str = '';
+  if (input instanceof Error) {
+    str = `${input.name}: ${input.message}`;
+  } else if (typeof input === 'object' && input !== null) {
+    try {
+      str = JSON.stringify(input);
+    } catch {
+      str = String(input);
+    }
+  } else {
+    str = String(input);
+  }
+
+  // Mask Telegram Bot Token regex pattern (e.g. bot123456789:ABCdefGHI...)
+  str = str.replace(/bot\d+:[A-Za-z0-9_-]+/gi, 'bot[REDACTED_TOKEN]');
+
+  // Mask explicit token if provided
+  if (tokenToMask && tokenToMask.length > 5) {
+    str = str.split(tokenToMask).join('[REDACTED_TOKEN]');
+  }
+
+  return str;
+}
+
+/**
  * Sends a message via Telegram Bot API with retry mechanism and timeout.
  */
 export async function sendTelegramMessage(options: TelegramSendMessageOptions): Promise<boolean> {
@@ -62,9 +91,15 @@ export async function sendTelegramMessage(options: TelegramSendMessageOptions): 
       }
 
       const errData = await response.text();
-      console.error(`[Telegram Helper] Attempt ${attempt} failed (${response.status}):`, errData);
+      console.error(
+        `[Telegram Helper] Attempt ${attempt} failed (${response.status}):`,
+        sanitizeLog(errData, options.botToken)
+      );
     } catch (err) {
-      console.error(`[Telegram Helper] Attempt ${attempt} network error:`, err);
+      console.error(
+        `[Telegram Helper] Attempt ${attempt} network error:`,
+        sanitizeLog(err, options.botToken)
+      );
     }
   }
 
@@ -102,7 +137,7 @@ export async function editTelegramMessage(options: TelegramEditMessageOptions): 
     });
     return response.ok;
   } catch (err) {
-    console.error('[Telegram Helper] Edit message error:', err);
+    console.error('[Telegram Helper] Edit message error:', sanitizeLog(err, options.botToken));
     return false;
   }
 }
