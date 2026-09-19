@@ -13,6 +13,17 @@ export async function POST(request: Request) {
       // Strip invisible Unicode control/formatting characters (RTL/LTR marks, zero-width spaces, BOM)
       const text = rawText.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u202A-\u202E\u00A0]/g, '').trim();
 
+      // Safe diagnostic metadata logging (No tokens, secrets, chat IDs, or PII)
+      console.log('[Admin Webhook Debug]', {
+        hasMessage: !!msg,
+        hasText: !!msg.text,
+        hasCaption: !!msg.caption,
+        rawTextLength: rawText.length,
+        rawFirstCodePoint: rawText.length > 0 ? rawText.codePointAt(0) : null,
+        cleanTextLength: text.length,
+        cleanFirstCodePoint: text.length > 0 ? text.codePointAt(0) : null,
+      });
+
       // Verify that the incoming chat ID matches the authorized TELEGRAM_ADMIN_CHAT_ID
       const authorizedChatId = process.env.TELEGRAM_ADMIN_CHAT_ID ? process.env.TELEGRAM_ADMIN_CHAT_ID.trim() : '';
 

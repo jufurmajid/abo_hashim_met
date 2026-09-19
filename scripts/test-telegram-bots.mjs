@@ -75,6 +75,19 @@ async function testTelegramBots() {
   }
   console.log('✅ LTR mark \\u200e/start command response verified!');
 
+  // Test /start_123 and deep-link start variations
+  const startDeepLinkResponse = await telegramAdminService.handleAdminCommand('12345', '/start_123', productRepo, orderRepo);
+  if (!startDeepLinkResponse.includes('لوحة تحكم إدارة متجر أبو هاشم')) {
+    throw new Error('/start_123 deep-link command response failed');
+  }
+  console.log('✅ Deep-link /start_123 command response verified!');
+
+  const startParamResponse = await telegramAdminService.handleAdminCommand('12345', '/start=admin', productRepo, orderRepo);
+  if (!startParamResponse.includes('لوحة تحكم إدارة متجر أبو هاشم')) {
+    throw new Error('/start=admin command response failed');
+  }
+  console.log('✅ Deep-link /start=admin command response verified!');
+
   // Test /help command
   const helpResponse = await telegramAdminService.handleAdminCommand('12345', '/help', productRepo, orderRepo);
   console.log('✅ /help command response:\n', helpResponse);
