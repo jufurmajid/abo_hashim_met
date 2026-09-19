@@ -36,7 +36,11 @@ export class TelegramAdminService implements ITelegramAdminService {
     productRepo: IProductRepository,
     orderRepo: IOrderRepository
   ): Promise<string> {
-    const cleanedText = commandText.trim();
+    // Strip invisible Unicode control/formatting characters (RTL/LTR marks, zero-width spaces, BOM, etc.)
+    const cleanedText = (commandText || '')
+      .replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u202A-\u202E\u00A0]/g, '')
+      .trim();
+
     if (!cleanedText) return '❌ يرجى كتابة أمر صحيح. استخدم `/help` لعرض الأوامر المتاحة.';
 
     const parts = cleanedText.split(/\s+/);

@@ -9,7 +9,9 @@ export async function POST(request: Request) {
 
     if (msg && (msg.text || msg.caption)) {
       const chatId = String(msg.chat.id).trim();
-      const text = String(msg.text || msg.caption).trim();
+      const rawText = String(msg.text || msg.caption || '');
+      // Strip invisible Unicode control/formatting characters (RTL/LTR marks, zero-width spaces, BOM)
+      const text = rawText.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u202A-\u202E\u00A0]/g, '').trim();
 
       // Verify that the incoming chat ID matches the authorized TELEGRAM_ADMIN_CHAT_ID
       const authorizedChatId = process.env.TELEGRAM_ADMIN_CHAT_ID ? process.env.TELEGRAM_ADMIN_CHAT_ID.trim() : '';

@@ -62,6 +62,19 @@ async function testTelegramBots() {
   }
   console.log('✅ Plain text "start" command response verified!');
 
+  // Test /start with invisible RTL/LTR Unicode control characters (\u200f/start, \u200e/start)
+  const rtlStartResponse = await telegramAdminService.handleAdminCommand('12345', '\u200f/start', productRepo, orderRepo);
+  if (!rtlStartResponse.includes('لوحة تحكم إدارة متجر أبو هاشم')) {
+    throw new Error('RTL mark /start command response failed');
+  }
+  console.log('✅ RTL mark \\u200f/start command response verified!');
+
+  const ltrStartResponse = await telegramAdminService.handleAdminCommand('12345', '\u200e/start', productRepo, orderRepo);
+  if (!ltrStartResponse.includes('لوحة تحكم إدارة متجر أبو هاشم')) {
+    throw new Error('LTR mark \\u200e/start command response failed');
+  }
+  console.log('✅ LTR mark \\u200e/start command response verified!');
+
   // Test /help command
   const helpResponse = await telegramAdminService.handleAdminCommand('12345', '/help', productRepo, orderRepo);
   console.log('✅ /help command response:\n', helpResponse);
