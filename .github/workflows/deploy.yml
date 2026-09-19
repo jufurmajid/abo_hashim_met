@@ -3,7 +3,7 @@ name: Deploy to Cloudflare Workers
 on:
   push:
     branches:
-      - main
+      - feature/abo-hashim-ecommerce-v1-7747657611186052271
 
 jobs:
   deploy:
