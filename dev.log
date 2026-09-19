@@ -1,0 +1,9 @@
+▲ Next.js 16.3.5 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 540ms
+✓ Running next.config.ts took 44ms
+
+○ Compiling / ...
+ GET / 200 in 10.7s (next.js: 10.4s, application-code: 374ms)
+ GET / 200 in 80ms (next.js: 7ms, application-code: 73ms)
