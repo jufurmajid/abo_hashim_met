@@ -36,14 +36,29 @@ export class TelegramAdminService implements ITelegramAdminService {
     productRepo: IProductRepository,
     orderRepo: IOrderRepository
   ): Promise<string> {
-    const parts = commandText.trim().split(/\s+/);
-    // Strip @botusername suffix if present (e.g., /addproduct@AboHashimAdminBot -> /addproduct)
-    const command = parts[0].toLowerCase().split('@')[0];
+    const cleanedText = commandText.trim();
+    if (!cleanedText) return '❌ يرجى كتابة أمر صحيح. استخدم `/help` لعرض الأوامر المتاحة.';
+
+    const parts = cleanedText.split(/\s+/);
+    let rawCmd = parts[0].toLowerCase().trim();
+
+    // Clean leading/trailing quotes or brackets if present
+    rawCmd = rawCmd.replace(/^['"]+|['"]+$/g, '');
+
+    // Strip @botusername suffix if present (e.g., /start@AboHashimAdminBot -> /start)
+    rawCmd = rawCmd.split('@')[0];
+
+    // Ensure leading slash for uniform route matching
+    const command = rawCmd.startsWith('/') ? rawCmd : '/' + rawCmd;
     const args = parts.slice(1);
 
     switch (command) {
       case '/start':
       case '/help':
+      case '/مساعدة':
+      case '/أوامر':
+      case '/الرئيسية':
+      case '/بداية':
         return (
           `👑 *لوحة تحكم إدارة متجر أبو هاشم (GitHub Sync)*\n\n` +
           `الأوامر المتاحة لإدارة المنتجات:\n` +
@@ -59,7 +74,10 @@ export class TelegramAdminService implements ITelegramAdminService {
           `💡 *التصنيفات المتاحة:* \`meats\` (لحوم), \`dairy\` (ألبان), \`cheese\` (أجبان), \`other\` (أخرى)`
         );
 
-      case '/products': {
+      case '/products':
+      case '/المنتجات':
+      case '/عرض_المنتجات':
+      case '/قائمة_المنتجات': {
         const products = await productRepo.getAllProducts();
         if (products.length === 0) return '📦 لا توجد منتجات مسجلة حالياً.';
 
@@ -75,7 +93,9 @@ export class TelegramAdminService implements ITelegramAdminService {
         return `📦 *قائمة جميع المنتجات (${products.length}):*\n\n${list}`;
       }
 
-      case '/orders': {
+      case '/orders':
+      case '/الطلبات':
+      case '/عرض_الطلبات': {
         const orders = await orderRepo.getAllOrders();
         if (orders.length === 0) return '📑 لا توجد طلبات مسجلة حتى الآن.';
 
@@ -91,7 +111,9 @@ export class TelegramAdminService implements ITelegramAdminService {
         return `📑 *أحدث الطلبات المسجلة (${recentOrders.length}/${orders.length}):*\n\n${list}`;
       }
 
-      case '/addproduct': {
+      case '/addproduct':
+      case '/إضافة_منتج':
+      case '/اضافة_منتج': {
         if (args.length < 3) {
           return (
             '❌ يرجى استخدام الصيغة:\n' +
@@ -139,7 +161,8 @@ export class TelegramAdminService implements ITelegramAdminService {
         );
       }
 
-      case '/editproduct': {
+      case '/editproduct':
+      case '/تعديل_منتج': {
         if (args.length < 3) {
           return (
             '❌ يرجى استخدام الصيغة:\n' +
@@ -198,7 +221,8 @@ export class TelegramAdminService implements ITelegramAdminService {
         return `✅ تم تعديل حقل *${field}* للمنتج *${updated?.name}* بنجاح وتحديث GitHub!`;
       }
 
-      case '/deleteproduct': {
+      case '/deleteproduct':
+      case '/حذف_منتج': {
         if (args.length < 1) return '❌ يرجى استخدام الصيغة: `/deleteproduct [ID_المنتج]`';
         const prodId = args[0];
         const existing = await productRepo.getProductById(prodId);
@@ -211,7 +235,8 @@ export class TelegramAdminService implements ITelegramAdminService {
         return `❌ فشل حذف المنتج بـ ID \`${prodId}\`.`;
       }
 
-      case '/updateprice': {
+      case '/updateprice':
+      case '/تعديل_سعر': {
         if (args.length < 2) return '❌ يرجى استخدام الصيغة: `/updateprice [ID_المنتج] [السعر_الجديد]`';
         const [prodId, priceStr] = args;
         const newPrice = parseFloat(priceStr);
@@ -223,7 +248,8 @@ export class TelegramAdminService implements ITelegramAdminService {
         return `✅ تم تعديل سعر *${updated.name}* بنجاح إلى: *${updated.price.toLocaleString('ar-IQ')} د.ع* وتم التحديث في GitHub.`;
       }
 
-      case '/updatestock': {
+      case '/updatestock':
+      case '/تعديل_مخزون': {
         if (args.length < 2) return '❌ يرجى استخدام الصيغة: `/updatestock [ID_المنتج] [المخزون_الجديد]`';
         const [prodId, stockStr] = args;
         const newStock = parseInt(stockStr, 10);
@@ -238,7 +264,8 @@ export class TelegramAdminService implements ITelegramAdminService {
         return `✅ تم تعديل مخزون *${updated.name}* بنجاح إلى: *${updated.stock}* وتم التحديث في GitHub.`;
       }
 
-      case '/toggleproduct': {
+      case '/toggleproduct':
+      case '/تغيير_حالة': {
         if (args.length < 1) return '❌ يرجى استخدام الصيغة: `/toggleproduct [ID_المنتج]`';
         const prodId = args[0];
         const existing = await productRepo.getProductById(prodId);
@@ -248,7 +275,8 @@ export class TelegramAdminService implements ITelegramAdminService {
         return `✅ تم تغيير حالة *${updated?.name}* إلى: ${updated?.isAvailable ? '🟢 متوفر' : '🔴 غير متوفر'} وتم التحديث في GitHub.`;
       }
 
-      case '/syncgithub': {
+      case '/syncgithub':
+      case '/مزامنة': {
         const allProds = await productRepo.getAllProducts();
         const res = await syncFileToGitHub({
           filePath: 'src/data/products.json',

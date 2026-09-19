@@ -41,6 +41,27 @@ async function testTelegramBots() {
   // 3. Test Admin Bot Commands
   console.log('\n--- 3. Testing Admin Bot Commands ---');
 
+  // Test /start command
+  const startResponse = await telegramAdminService.handleAdminCommand('12345', '/start', productRepo, orderRepo);
+  console.log('✅ /start command response:\n', startResponse);
+  if (!startResponse.includes('لوحة تحكم إدارة متجر أبو هاشم')) {
+    throw new Error('/start command response failed');
+  }
+
+  // Test /start@AboHashimAdminBot command
+  const startTaggedResponse = await telegramAdminService.handleAdminCommand('12345', '/start@AboHashimAdminBot', productRepo, orderRepo);
+  if (!startTaggedResponse.includes('لوحة تحكم إدارة متجر أبو هاشم')) {
+    throw new Error('/start@AboHashimAdminBot command response failed');
+  }
+  console.log('✅ /start@AboHashimAdminBot response verified!');
+
+  // Test plain-text "start" without slash
+  const startPlainResponse = await telegramAdminService.handleAdminCommand('12345', 'start', productRepo, orderRepo);
+  if (!startPlainResponse.includes('لوحة تحكم إدارة متجر أبو هاشم')) {
+    throw new Error('Plain text start command response failed');
+  }
+  console.log('✅ Plain text "start" command response verified!');
+
   // Test /help command
   const helpResponse = await telegramAdminService.handleAdminCommand('12345', '/help', productRepo, orderRepo);
   console.log('✅ /help command response:\n', helpResponse);
