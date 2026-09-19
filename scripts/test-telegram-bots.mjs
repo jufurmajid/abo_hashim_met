@@ -67,6 +67,20 @@ async function testTelegramBots() {
     throw new Error('Stock was not updated in database by Admin Bot');
   }
 
+  // Test /addproduct with bot username tag e.g. /addproduct@AboHashimAdminBot
+  console.log('\n--- 4. Testing Username-Tagged Command & Product Creation ---');
+  const addProdResponse = await telegramAdminService.handleAdminCommand(
+    '12345',
+    '/addproduct@AboHashimAdminBot لحم_عجل_بلدي 22000 15 meats كغم قطع_طازجة_ممتازة',
+    productRepo,
+    orderRepo
+  );
+  console.log('✅ /addproduct@AboHashimAdminBot response:\n', addProdResponse);
+
+  if (!addProdResponse.includes('تم إضافة المنتج الجديد بنجاح')) {
+    throw new Error('Failed to add product with tagged bot command');
+  }
+
   console.log('\n🎉 ALL TELEGRAM BOTS INTEGRATION UNIT TESTS PASSED SUCCESSFULLY!');
 }
 

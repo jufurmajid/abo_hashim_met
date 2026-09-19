@@ -12,11 +12,11 @@ export async function POST(request: Request) {
       const callbackQuery = update.callback_query;
       const data = callbackQuery.data || ''; // e.g. "status:ORD-123456:confirmed"
       const message = callbackQuery.message;
-      const chatId = String(message?.chat?.id || callbackQuery.from?.id);
+      const chatId = String(message?.chat?.id || callbackQuery.from?.id).trim();
 
       // Verify authorization against TELEGRAM_ORDERS_CHAT_ID or TELEGRAM_ADMIN_CHAT_ID
-      const authorizedOrdersChatId = process.env.TELEGRAM_ORDERS_CHAT_ID;
-      const authorizedAdminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+      const authorizedOrdersChatId = process.env.TELEGRAM_ORDERS_CHAT_ID ? process.env.TELEGRAM_ORDERS_CHAT_ID.trim() : '';
+      const authorizedAdminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID ? process.env.TELEGRAM_ADMIN_CHAT_ID.trim() : '';
 
       const isOrdersChatAuthorized = authorizedOrdersChatId && authorizedOrdersChatId !== 'your_orders_chat_id_here' && chatId === authorizedOrdersChatId;
       const isAdminChatAuthorized = authorizedAdminChatId && authorizedAdminChatId !== 'your_admin_chat_id_here' && chatId === authorizedAdminChatId;

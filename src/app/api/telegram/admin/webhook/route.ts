@@ -5,13 +5,15 @@ import { sendTelegramMessage, sanitizeLog } from '@/lib/services/telegram';
 export async function POST(request: Request) {
   try {
     const update = await request.json();
+    const msg = update.message || update.edited_message || update.channel_post;
 
-    if (update.message && update.message.text) {
-      const chatId = String(update.message.chat.id);
-      const text = update.message.text;
+    if (msg && (msg.text || msg.caption)) {
+      const chatId = String(msg.chat.id).trim();
+      const text = String(msg.text || msg.caption).trim();
 
       // Verify that the incoming chat ID matches the authorized TELEGRAM_ADMIN_CHAT_ID
-      const authorizedChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+      const authorizedChatId = process.env.TELEGRAM_ADMIN_CHAT_ID ? process.env.TELEGRAM_ADMIN_CHAT_ID.trim() : '';
+
       if (authorizedChatId && authorizedChatId !== 'your_admin_chat_id_here' && chatId !== authorizedChatId) {
         console.warn(`[Admin Webhook API] Unauthorized command attempt from chatId: ${chatId}`);
         await sendTelegramMessage({

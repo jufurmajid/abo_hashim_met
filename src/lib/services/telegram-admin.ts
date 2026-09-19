@@ -37,7 +37,8 @@ export class TelegramAdminService implements ITelegramAdminService {
     orderRepo: IOrderRepository
   ): Promise<string> {
     const parts = commandText.trim().split(/\s+/);
-    const command = parts[0].toLowerCase();
+    // Strip @botusername suffix if present (e.g., /addproduct@AboHashimAdminBot -> /addproduct)
+    const command = parts[0].toLowerCase().split('@')[0];
     const args = parts.slice(1);
 
     switch (command) {
@@ -91,7 +92,7 @@ export class TelegramAdminService implements ITelegramAdminService {
       }
 
       case '/addproduct': {
-        if (args.length < 5) {
+        if (args.length < 3) {
           return (
             '❌ يرجى استخدام الصيغة:\n' +
             '`/addproduct [الاسم] [السعر] [المخزون] [التصنيف] [الوحدة] [الوصف] [رابط_الصورة]`\n\n' +
@@ -99,12 +100,13 @@ export class TelegramAdminService implements ITelegramAdminService {
           );
         }
 
-        const [rawName, priceStr, stockStr, category, rawUnit, rawDesc, rawImg] = args;
+        const [rawName, priceStr, stockStr, categoryArg, rawUnit, rawDesc, rawImg] = args;
         const name = rawName.replace(/_/g, ' ');
         const price = parseFloat(priceStr);
         const stock = parseInt(stockStr, 10);
-        const unit = rawUnit ? rawUnit.replace(/_/g, ' ') : 'قطعة';
-        const description = rawDesc ? rawDesc.replace(/_/g, ' ') : 'منتج مضاف عبر بوت الإدارة';
+        const category = categoryArg || 'meats';
+        const unit = rawUnit ? rawUnit.replace(/_/g, ' ') : 'كغم';
+        const description = rawDesc ? rawDesc.replace(/_/g, ' ') : 'منتج طازج وموثوق من متجر أبو هاشم';
         const imageUrl = rawImg || 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=800&auto=format&fit=crop';
 
         if (isNaN(price) || price < 0 || isNaN(stock) || stock < 0) {

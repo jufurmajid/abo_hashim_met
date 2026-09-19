@@ -95,6 +95,24 @@ export async function sendTelegramMessage(options: TelegramSendMessageOptions): 
         `[Telegram Helper] Attempt ${attempt} failed (${response.status}):`,
         sanitizeLog(errData, options.botToken)
       );
+
+      // If Telegram failed due to parse_mode formatting (HTTP 400), retry without parse_mode
+      if (response.status === 400 && options.parseMode) {
+        try {
+          const fallbackBody = { ...body };
+          delete fallbackBody.parse_mode;
+          const fallbackRes = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fallbackBody),
+          });
+          if (fallbackRes.ok) {
+            return true;
+          }
+        } catch (fallbackErr) {
+          console.error('[Telegram Helper] Fallback plain-text send error:', sanitizeLog(fallbackErr, options.botToken));
+        }
+      }
     } catch (err) {
       console.error(
         `[Telegram Helper] Attempt ${attempt} network error:`,
@@ -135,7 +153,20 @@ export async function editTelegramMessage(options: TelegramEditMessageOptions): 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    return response.ok;
+    if (response.ok) return true;
+
+    if (response.status === 400 && options.parseMode) {
+      const fallbackBody = { ...body };
+      delete fallbackBody.parse_mode;
+      const fallbackRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fallbackBody),
+      });
+      return fallbackRes.ok;
+    }
+
+    return false;
   } catch (err) {
     console.error('[Telegram Helper] Edit message error:', sanitizeLog(err, options.botToken));
     return false;
