@@ -8,12 +8,20 @@ export interface ITelegramOrderService {
 }
 
 export class TelegramOrderService implements ITelegramOrderService {
-  private botToken: string;
-  private defaultChatId: string;
+  private customBotToken?: string;
+  private customDefaultChatId?: string;
 
   constructor(botToken?: string, defaultChatId?: string) {
-    this.botToken = botToken || process.env.TELEGRAM_ORDERS_BOT_TOKEN || 'your_orders_bot_token_here';
-    this.defaultChatId = defaultChatId || process.env.TELEGRAM_ORDERS_CHAT_ID || 'your_orders_chat_id_here';
+    this.customBotToken = botToken;
+    this.customDefaultChatId = defaultChatId;
+  }
+
+  private get botToken(): string {
+    return this.customBotToken || process.env.TELEGRAM_ORDERS_BOT_TOKEN || 'your_orders_bot_token_here';
+  }
+
+  private get defaultChatId(): string {
+    return this.customDefaultChatId || process.env.TELEGRAM_ORDERS_CHAT_ID || 'your_orders_chat_id_here';
   }
 
   formatOrderMessage(order: Order): string {

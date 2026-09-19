@@ -1,6 +1,6 @@
 import { getProductRepository, getOrderRepository } from '@/lib/data/factory';
 import { telegramAdminService } from '@/lib/services/telegram-admin';
-import { sendTelegramMessage } from '@/lib/services/telegram';
+import { sendTelegramMessage, sanitizeLog } from '@/lib/services/telegram';
 
 export async function POST(request: Request) {
   try {
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     return Response.json({ ok: true });
   } catch (error: unknown) {
-    console.error('[Admin Webhook API] Error:', error);
+    console.error('[Admin Webhook API] Error:', sanitizeLog(error));
     return Response.json({ ok: false, error: 'Internal Webhook Error' }, { status: 500 });
   }
 }
