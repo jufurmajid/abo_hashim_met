@@ -8,10 +8,11 @@ import { ProductGrid } from '@/components/ProductCard';
 import { CartDrawer } from '@/components/CartDrawer';
 import { CheckoutModal } from '@/components/CheckoutModal';
 import { Footer } from '@/components/Footer';
+import { BottomNav } from '@/components/BottomNav';
 import { CartProvider, useCart } from '@/context/CartContext';
 import { CategoryId, Product } from '@/types';
 import { getProductRepository } from '@/lib/data/factory';
-import { ShoppingBag, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 
 function StoreApp() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | 'all'>('all');
@@ -73,30 +74,31 @@ function StoreApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/80 text-slate-900 pb-20 sm:pb-0">
-      {/* Header with Live Search & Cart */}
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 pb-16 sm:pb-0">
+      {/* Header with Search & Delivery Address */}
       <Header
         onOpenCart={() => setIsCartOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onFilterClick={scrollToProducts}
       />
 
-      {/* Hero Section */}
+      {/* Hero Section Banner Carousel */}
       <Hero onExploreClick={scrollToProducts} />
 
       {/* Main Content Area */}
       <main
-        className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10"
+        className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8"
         ref={productsSectionRef}
       >
         {/* Section Heading */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-5">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-900 bg-rose-50 border border-rose-200/80 px-3 py-1 rounded-full mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>قائمة المنتجات الطازجة</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-3xl font-black text-rose-950 tracking-tight">
               {selectedCategory === 'all'
                 ? 'جميع المنتجات المتوفرة'
                 : selectedCategory === 'meats'
@@ -113,13 +115,13 @@ function StoreApp() {
           </div>
 
           {searchQuery && (
-            <div className="text-xs bg-amber-50 text-amber-800 border border-amber-200/80 px-3 py-1.5 rounded-xl font-bold self-start sm:self-auto">
+            <div className="text-xs bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-xl font-bold self-start sm:self-auto">
               نتائج البحث عن: &ldquo;{searchQuery}&rdquo; ({filteredProducts.length})
             </div>
           )}
         </div>
 
-        {/* Category Tabs */}
+        {/* Category Pill Tabs */}
         <CategoryFilter
           selectedCategory={selectedCategory}
           onSelectCategory={(cat) => {
@@ -131,7 +133,7 @@ function StoreApp() {
         {/* Loading State */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <Loader2 className="w-10 h-10 animate-spin text-emerald-600 mb-3" />
+            <Loader2 className="w-10 h-10 animate-spin text-rose-900 mb-3" />
             <p className="text-sm font-bold text-slate-600">جاري تحميل المنتجات...</p>
           </div>
         ) : (
@@ -143,31 +145,42 @@ function StoreApp() {
         )}
       </main>
 
-      {/* Floating Sticky Mobile Cart Bar */}
+      {/* Sticky Mobile Floating Cart bar (visible on mobile when cart has items) */}
       {totalItems > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 z-30 sm:hidden animate-slide-up">
+        <div className="fixed bottom-16 left-3 right-3 z-30 sm:hidden animate-slide-up">
           <button
             onClick={() => setIsCartOpen(true)}
-            className="w-full bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-3.5 rounded-2xl shadow-xl border border-emerald-600/40 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all"
+            className="w-full bg-gradient-to-r from-rose-950 via-rose-900 to-rose-950 text-white p-3 rounded-2xl shadow-xl border border-rose-800/60 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all"
           >
-            <div className="flex items-center gap-3">
-              <div className="relative bg-amber-400 text-slate-950 w-9 h-9 rounded-xl font-black text-sm flex items-center justify-center shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <div className="bg-amber-400 text-rose-950 w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shadow-xs">
                 {totalItems}
               </div>
               <div className="text-right">
-                <span className="block text-xs font-bold text-emerald-100">سلة المشتريات</span>
-                <span className="text-sm font-black text-white">
+                <span className="block text-[10px] font-bold text-amber-300">سلة المشتريات</span>
+                <span className="text-xs font-black text-white">
                   {totalPrice.toLocaleString('ar-IQ')} د.ع
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-bold bg-white/10 px-3 py-2 rounded-xl text-white">
+            <div className="flex items-center gap-1 text-xs font-bold bg-white/10 px-2.5 py-1.5 rounded-xl text-white">
               <span>عرض السلة</span>
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
             </div>
           </button>
         </div>
       )}
+
+      {/* Sticky Bottom Navigation Bar for Android / Mobile */}
+      <BottomNav
+        onOpenCart={() => setIsCartOpen(true)}
+        onScrollToProducts={scrollToProducts}
+        onHomeClick={() => {
+          setSelectedCategory('all');
+          setSearchQuery('');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       {/* Cart Drawer */}
       <CartDrawer
